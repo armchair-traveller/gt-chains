@@ -17,6 +17,9 @@ export default {
   // bari: {
   //   chain: ["injured", "downed"],
   // },
+  nari: {
+    chain: ["downed", "airborne"],
+  },
   // lupina: {
   //   chain: ["injured", "airborne"],
   // },
