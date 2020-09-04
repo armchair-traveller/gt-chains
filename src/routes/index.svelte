@@ -126,34 +126,32 @@
 
   <button on:click={() => (isVisible = !isVisible)}>Click me</button>
 
-  {#if isVisible}
-    {#each chains as chain, i}
-      <section transition:fade>
-        {#each chain as heroName, i}
-          <!-- Arrow logic -->
-          {#if i != 0}
-            <p class="arrow">
-              {#if heroes[chain[i - 1]].chain[1] == heroes[heroName].chain[0]}
-                &Rarr;
-              {:else}&rarr;{/if}
-            </p>
-          {/if}
-          <!-- Hero & chain -->
-          <div>
-            <h3>{heroName}</h3>
-            <p class="chain">
-              {#if i == 0}
-                {heroes[heroName].chain[0]} / {heroes[heroName].chain[1]}
-              {:else if heroes[chain[i - 1]].chain[1] == heroes[heroName].chain[0]}
-                {heroes[heroName].chain[1]}
-              {:else}
-                {heroes[heroName].chain[0]} / {heroes[heroName].chain[1]}
-              {/if}
-            </p>
-          </div>
-        {/each}
-      </section>
-      {#if i != chains.length - 1}<br />{/if}
-    {/each}
-  {/if}
+  {#each chains as chain, i}
+    <section transition:fade>
+      {#each chain as heroName, i}
+        <!-- Arrow logic -->
+        {#if i != 0}
+          <p class="arrow">
+            {#if heroes[chain[i - 1]].chain[1] == heroes[heroName].chain[0]}
+              &Rarr;
+            {:else}&rarr;{/if}
+          </p>
+        {/if}
+        <!-- Hero & chain -->
+        <div>
+          <h3>{heroName}</h3>
+          <p class="chain">
+            {#if i == 0}
+              {heroes[heroName].chain[0]} / {heroes[heroName].chain[1]}
+            {:else if heroes[chain[i - 1]].chain[1] == heroes[heroName].chain[0]}
+              {heroes[heroName].chain[1]}
+            {:else}
+              {heroes[heroName].chain[0]} / {heroes[heroName].chain[1]}
+            {/if}
+          </p>
+        </div>
+      {/each}
+    </section>
+    {#if i != chains.length - 1}<br />{/if}
+  {/each}
 </div>
