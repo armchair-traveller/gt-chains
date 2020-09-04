@@ -9,7 +9,11 @@ body {
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  color: #333;
+  --background-color: #000;
+  --primary-color: #fff;
+  --secondary-color: #888;
+  color: var(--primary-color);
+  background-color: var(--background-color);
 }
 
 h1,
