@@ -1,8 +1,8 @@
 {
   "background_color": "#ffffff",
   "theme_color": "#333333",
-  "name": "TODO",
-  "short_name": "TODO",
+  "name": "Guardian Tales Chains",
+  "short_name": "gt-chains",
   "display": "minimal-ui",
   "start_url": "/"
 }

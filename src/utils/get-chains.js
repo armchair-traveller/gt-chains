@@ -7,7 +7,6 @@ export default function getChains(heroes) {
     return acc;
   }, []);
 
-  // TODO: Check if this creates a 5th entry in arr. If so, do a reduce instead of a map to dupe and split the difference of curHeroes
   return chainer(chainer(initChains)).reduce((acc, [prevHeroes, curHeroes]) => {
     curHeroes.forEach((name) => acc.push([...prevHeroes, name]));
     return acc;

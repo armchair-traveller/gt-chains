@@ -1,6 +1,6 @@
 {
-  "name": "TODO",
-  "description": "TODO",
+  "name": "gt-chains",
+  "description": "A webapp to help find all potential chains",
   "version": "0.0.1",
   "scripts": {
     "dev": "sapper dev",
