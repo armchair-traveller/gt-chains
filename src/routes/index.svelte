@@ -24,11 +24,13 @@
   let filterText;
   let selRef; // svelte-select handleClick for focusing isn't public. Must access ref @ index 32. API could change on update
 
-  let selectReady = true; // if you're an impatient user, this causes bugs. Hopefully they don't click this much
+  let selectReady = [true, true, true, true]; // transition readiness
 
   var selHeroes;
   $: {
     selHeroes = selectedHeroes.filter((v) => v != ""); // filter out empty strings from selected heroes
+
+    // reactive processing, filter and sort chains according to selected heroes
     chains = allChains
       .filter((chain) => {
         return chain.find((el) => el);
@@ -40,11 +42,34 @@
           }
         }
         return true;
+      })
+      .sort((a, b) => {
+        let matches = 0;
+        for (let i = 0; i < a.length; i++) {
+          if (a[i] == selectedHeroes[i]) {
+            matches--;
+          }
+          if (b[i] == selectedHeroes[i]) {
+            matches++;
+          }
+        }
+        return matches;
       });
   }
 
-  function infiniteHandler({ detail }) {
-    console.log(detail);
+  $: infLoaderList = [...chains]; // duplicate chains to mutate w/ infiniteList
+  var infiniteList = [];
+  $: if (chains.length == infLoaderList.length) {
+    infiniteList = infLoaderList.splice(0, 17); // populate w/ init data
+  }
+
+  function infiniteHandler({ detail: { loaded, complete } }) {
+    if (infLoaderList.length) {
+      infiniteList = [...infiniteList, ...infLoaderList.splice(0, 10)];
+      loaded();
+    } else {
+      complete();
+    }
   }
 
   function parseName(heroName) {
@@ -60,30 +85,17 @@
 </script>
 
 <style>
-  h1,
   p,
   h3 {
     text-align: center;
     margin: 0 auto;
     color: var(--primary-color);
   }
-  h1 {
-    font-size: 2.8em;
-    text-transform: uppercase;
-    font-weight: 700;
-    margin: 0 0 0.5em 0;
-  }
 
   p {
     /* override cascade */
     color: var(--secondary-color);
     margin: 1em auto;
-  }
-
-  @media (min-width: 480px) {
-    h1 {
-      font-size: 4em;
-    }
   }
 
   section {
@@ -101,26 +113,13 @@
     align-items: center;
   }
 
-  /* .outline {
-    outline: none;
-    transition: all 0.15s ease-out;
-  }
-  .outline:focus {
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.6);
-  } */
-
-  .stack > * + * {
-    margin-top: 1.5rem;
-  }
-
   h3 {
     font-weight: 500;
   }
 
-  br {
+  hr {
     width: 7em;
-    height: 0.1em;
-    margin-bottom: 1em;
+    margin-bottom: 1.5em;
     content: "";
     border-top: 1px solid var(--primary-color);
   }
@@ -149,10 +148,12 @@
     height: 4em;
     background: none;
   }
-  .selected-hero-btn:hover {
+  .selected-hero-btn:hover,
+  .selected-hero-btn:focus {
     border-color: rgba(255, 255, 255, 0.5);
     background: rgba(255, 255, 255, 0.2);
   }
+
   .selected-hero-btn h3 {
     font-weight: 600;
   }
@@ -174,19 +175,6 @@
 </svelte:head>
 
 <div class="container">
-  <!-- <div class="input-container">
-    <input
-      class="outline"
-      placeholder="Type in a hero..."
-      bind:value
-      on:change={(e) => {
-        if (heroNames.find((v) => e.target.value.toLowerCase() == v)) {
-          value = e.target.value.toLowerCase();
-          value = '';
-        }
-      }} />
-  </div> -->
-
   <div class="selected-heroes">
     {#each selectedHeroes as hero, i}
       <button
@@ -206,11 +194,11 @@
         {#if hero && selectReady}
           <h3
             transition:fade
-            on:outrostart={() => (selectReady = i)}
-            on:outroend={() => (selectReady = true)}>
+            on:outrostart={() => (selectReady[i] = false)}
+            on:outroend={() => (selectReady[i] = true)}>
             {parseName(hero)}
           </h3>
-        {:else if selectReady !== i}
+        {:else if selectReady[i] == true}
           <p style="font-size: 2em;">+</p>
         {/if}
       </button>
@@ -236,9 +224,13 @@
     </div>
   {/if}
 
-  {#if selHeroes && selHeroes.length > 0}
+  {#if selHeroes.length > 0}
+    {#if !infiniteList.length}
+      <p transition:fade>No chains found 🥴</p>
+    {/if}
+
     <div>
-      {#each chains as chain, i}
+      {#each infiniteList as chain, i}
         <section transition:fade>
           {#each chain as heroName, i}
             <!-- Arrows -->
@@ -264,9 +256,16 @@
             </div>
           {/each}
         </section>
-        {#if i != chains.length - 1}<br />{/if}
+        {#if i != infiniteList.length - 1}
+          <hr />
+        {/if}
       {/each}
-      <!-- TODO: Remove if unable to use <InfiniteLoading on:infinite={infiniteHandler} /> -->
+
+      <InfiniteLoading on:infinite={infiniteHandler}>
+        <div transition:fade slot="noMore" style="margin-bottom:1.5em;">
+          You've reached the end of the chains ⛄&rarr;💧
+        </div>
+      </InfiniteLoading>
     </div>
   {/if}
 </div>
