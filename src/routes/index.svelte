@@ -136,7 +136,8 @@
 
   .selected-heroes {
     display: flex;
-    flex-flow: row nowrap;
+    flex-flow: row wrap;
+    justify-content: center;
     margin: 1.5em auto;
   }
   .selected-hero-btn {
