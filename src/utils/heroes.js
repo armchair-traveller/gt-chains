@@ -14,9 +14,9 @@ export default {
   idolEva: {
     chain: ["all", "downed"],
   },
-  // bari: {
-  //   chain: ["injured", "downed"],
-  // },
+  bari: {
+    chain: ["injured", "downed"],
+  },
   nari: {
     chain: ["downed", "airborne"],
   },

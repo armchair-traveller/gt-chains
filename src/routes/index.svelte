@@ -2,16 +2,61 @@
   import heroes from "../utils/heroes";
   import getChains from "../utils/get-chains";
   import { fade } from "svelte/transition";
-
-  let value = "";
-
-  let isVisible = true;
+  import Select from "svelte-select";
+  import InfiniteLoading from "svelte-infinite-loading";
 
   var heroNames = Object.keys(heroes);
   var allChains = getChains(heroes);
   $: chains = allChains.filter((chain) => {
     return chain.find((el) => el);
   });
+
+  let selectedHeroes = ["", "", "", ""];
+  let curHeroSlot = 0;
+
+  $: items = [
+    ...heroNames
+      .filter((v) => !selectedHeroes.includes(v))
+      .map((v) => ({ value: v, label: parseName(v) })),
+  ];
+  let isSelectVisible = true;
+  let selectedValue;
+  let filterText;
+  let selRef; // svelte-select handleClick for focusing isn't public. Must access ref @ index 32. API could change on update
+
+  let selectReady = true; // if you're an impatient user, this causes bugs. Hopefully they don't click this much
+
+  var selHeroes;
+  $: {
+    selHeroes = selectedHeroes.filter((v) => v != ""); // filter out empty strings from selected heroes
+    chains = allChains
+      .filter((chain) => {
+        return chain.find((el) => el);
+      })
+      .filter((chain) => {
+        for (let heroName of selHeroes) {
+          if (!chain.includes(heroName)) {
+            return false;
+          }
+        }
+        return true;
+      });
+  }
+
+  function infiniteHandler({ detail }) {
+    console.log(detail);
+  }
+
+  function parseName(heroName) {
+    return heroName == ""
+      ? ""
+      : heroName == "fMei"
+      ? "F/Mei"
+      : heroName
+          .split(/(?=[A-Z])/)
+          .map((name) => name[0].toUpperCase() + name.slice(1))
+          .join(" ");
+  }
 </script>
 
 <style>
@@ -56,19 +101,13 @@
     align-items: center;
   }
 
-  input {
-    border: none;
-    padding: 0.5em 1em;
-    border-radius: 1em;
-    margin: 1.5em auto;
-  }
-  .outline {
+  /* .outline {
     outline: none;
     transition: all 0.15s ease-out;
   }
   .outline:focus {
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.6);
-  }
+  } */
 
   .stack > * + * {
     margin-top: 1.5rem;
@@ -95,6 +134,36 @@
   .chain {
     white-space: nowrap;
   }
+
+  .selected-heroes {
+    display: flex;
+    flex-flow: row nowrap;
+    margin: 1.5em auto;
+  }
+  .selected-hero-btn {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    border: 1px solid white;
+    width: 10em;
+    height: 4em;
+    background: none;
+  }
+  .selected-hero-btn:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .selected-hero-btn h3 {
+    font-weight: 600;
+  }
+
+  .select-container {
+    color: black;
+    width: 12em;
+    border: none;
+    border-radius: 1em;
+    margin-bottom: 1.5em;
+  }
 </style>
 
 <svelte:head>
@@ -105,7 +174,7 @@
 </svelte:head>
 
 <div class="container">
-  <div class="input-container">
+  <!-- <div class="input-container">
     <input
       class="outline"
       placeholder="Type in a hero..."
@@ -116,42 +185,88 @@
           value = '';
         }
       }} />
-  </div>
-  <!-- TODO: Make this into a search dropdown -->
-  {#if false}
-    {#each heroNames.filter((v) => v.includes(value)) as hero}
-      <p>{hero[0].toUpperCase() + hero.slice(1)}</p>
+  </div> -->
+
+  <div class="selected-heroes">
+    {#each selectedHeroes as hero, i}
+      <button
+        class="selected-hero-btn"
+        on:click={() => {
+          if (hero) {
+            selectedHeroes[i] = '';
+          } else {
+            function refWait() {
+              selRef.$$.ctx[32]();
+            }
+            setTimeout(refWait, 300);
+            isSelectVisible = true;
+            curHeroSlot = i;
+          }
+        }}>
+        {#if hero && selectReady}
+          <h3
+            transition:fade
+            on:outrostart={() => (selectReady = i)}
+            on:outroend={() => (selectReady = true)}>
+            {parseName(hero)}
+          </h3>
+        {:else if selectReady !== i}
+          <p style="font-size: 2em;">+</p>
+        {/if}
+      </button>
     {/each}
+  </div>
+
+  {#if isSelectVisible}
+    <div transition:fade class="select-container">
+      <Select
+        bind:filterText
+        bind:selectedValue
+        bind:this={selRef}
+        {items}
+        placeholder="Select hero..."
+        noOptionsMessage="No results found 🧀"
+        on:select={({ detail: { value } }) => {
+          selectedHeroes[curHeroSlot] = value;
+          isSelectVisible = false;
+          selectedValue = undefined;
+          filterText = '';
+        }}
+        isVirtualList />
+    </div>
   {/if}
 
-  <button on:click={() => (isVisible = !isVisible)}>Click me</button>
-
-  {#each chains as chain, i}
-    <section transition:fade>
-      {#each chain as heroName, i}
-        <!-- Arrow logic -->
-        {#if i != 0}
-          <p class="arrow">
-            {#if heroes[chain[i - 1]].chain[1] == heroes[heroName].chain[0]}
-              &Rarr;
-            {:else}&rarr;{/if}
-          </p>
-        {/if}
-        <!-- Hero & chain -->
-        <div>
-          <h3>{heroName}</h3>
-          <p class="chain">
-            {#if i == 0}
-              {heroes[heroName].chain[0]} / {heroes[heroName].chain[1]}
-            {:else if heroes[chain[i - 1]].chain[1] == heroes[heroName].chain[0]}
-              {heroes[heroName].chain[1]}
-            {:else}
-              {heroes[heroName].chain[0]} / {heroes[heroName].chain[1]}
+  {#if selHeroes && selHeroes.length > 0}
+    <div>
+      {#each chains as chain, i}
+        <section transition:fade>
+          {#each chain as heroName, i}
+            <!-- Arrows -->
+            {#if i != 0}
+              <p class="arrow">
+                {#if heroes[chain[i - 1]].chain[1] == heroes[heroName].chain[0]}
+                  &Rarr;
+                {:else}&rarr;{/if}
+              </p>
             {/if}
-          </p>
-        </div>
+            <!-- Hero & chain -->
+            <div>
+              <h3>{parseName(heroName)}</h3>
+              <p class="chain">
+                {#if i == 0}
+                  {heroes[heroName].chain[0]} / {heroes[heroName].chain[1]}
+                {:else if heroes[chain[i - 1]].chain[1] == heroes[heroName].chain[0]}
+                  {heroes[heroName].chain[1]}
+                {:else}
+                  {heroes[heroName].chain[0]} / {heroes[heroName].chain[1]}
+                {/if}
+              </p>
+            </div>
+          {/each}
+        </section>
+        {#if i != chains.length - 1}<br />{/if}
       {/each}
-    </section>
-    {#if i != chains.length - 1}<br />{/if}
-  {/each}
+      <!-- TODO: Remove if unable to use <InfiniteLoading on:infinite={infiniteHandler} /> -->
+    </div>
+  {/if}
 </div>
