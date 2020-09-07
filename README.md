@@ -1,6 +1,6 @@
 # Lightning Counter ⚡
 
-Helps you find any potential skill chains based on hero selection and rearrange your raid/grinding teams to those chains!
+Helps you find any potential skill chains based on hero selection and rearrange your raid/grinding teams to those chains, for the game Guardian Tales.
 
 ## Tech & Features
 
