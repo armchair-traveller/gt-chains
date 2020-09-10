@@ -20,6 +20,9 @@ export default {
   nari: {
     chain: ["downed", "airborne"],
   },
+  bianca: {
+    chain: ["airborne", "downed"],
+  },
   lupina: {
     chain: ["injured", "airborne"],
   },
