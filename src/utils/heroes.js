@@ -17,12 +17,6 @@ export default {
   bari: {
     chain: ["injured", "downed"],
   },
-  nari: {
-    chain: ["downed", "airborne"],
-  },
-  bianca: {
-    chain: ["airborne", "downed"],
-  },
   lupina: {
     chain: ["injured", "airborne"],
   },
@@ -37,6 +31,15 @@ export default {
   },
   vishuvac: {
     chain: ["all", "injured"],
+  },
+  nari: {
+    chain: ["downed", "airborne"],
+  },
+  bianca: {
+    chain: ["airborne", "downed"],
+  },
+  ogma: {
+    chain: ["downed", "injured"],
   },
   knight: {
     chain: ["airborne", "downed"],
