@@ -38,8 +38,14 @@ export default {
   bianca: {
     chain: ["airborne", "downed"],
   },
-  ogma: {
+  oghma: {
     chain: ["downed", "injured"],
+  },
+  alef: {
+    chain: ["airborne", "downed"],
+  },
+  miya: {
+    chain: ["all", "downed"],
   },
   knight: {
     chain: ["airborne", "downed"],
