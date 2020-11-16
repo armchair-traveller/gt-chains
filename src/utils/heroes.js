@@ -47,6 +47,9 @@ export default {
   miya: {
     chain: ["all", "downed"],
   },
+  princess: {
+    chain: ["injured", "downed"],
+  },
   knight: {
     chain: ["airborne", "downed"],
   },
